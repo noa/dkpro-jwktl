@@ -15,6 +15,8 @@ import de.tudarmstadt.ukp.jwktl.api.PartOfSpeech;
 import de.tudarmstadt.ukp.jwktl.api.filter.WiktionaryEntryFilter;
 import de.tudarmstadt.ukp.jwktl.api.util.Language;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class ExtractClosedClass {
 
     /** Runs the example.
@@ -59,6 +61,18 @@ public class ExtractClosedClass {
                     PartOfSpeech pos = entry.getPartOfSpeech();
                     if(!forbid.contains(pos)) {
                         String lemma = entry.getWord();
+
+                        // Skip multi-word lemmas
+                        //if(lemma.split("\\s+").size() > 1) continue;
+
+                        if(lemma.length() < 2) continue;
+
+                        // Skip it's all alpha
+                        if(!StringUtils.isAlpha(lemma)) continue;
+
+                        // Make sure it's ASCII printable
+                        if(!StringUtils.isAsciiPrintable(lemma)) continue;
+
                         if(!dictionary.containsKey(lemma)) {
                             dictionary.put(lemma, pos);
                         }
@@ -85,7 +99,7 @@ public class ExtractClosedClass {
         System.out.println("Pages: " + pageCount);
         System.out.println("Entries: " + entryCount);
         System.out.println("Senses: " + senseCount);
-        System.out.println("Closed-class words: " + closedClassCount);
+        System.out.println("Closed-class words: " + dictionary.size());
 
         // Close the Wiktionary edition.
         wkt.close();
